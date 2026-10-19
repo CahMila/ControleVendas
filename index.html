@@ -5,14 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Vision XTech | Gestão</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Menu Inferior para Celular / Barra Lateral para PC -->
+  <!-- Menu Inferior no Celular / Lateral no PC -->
   <nav class="app-nav">
     <div class="brand-pc">
-      <div class="brand-icon">📦</div>
-      <strong>Vision XTech</strong>
+      <div class="brand-icon">⚡</div>
+      <div class="brand-name">
+        <strong>Vision XTech</strong>
+        <small>Gestão Direta</small>
+      </div>
     </div>
 
     <div class="nav-links">
@@ -25,7 +31,7 @@
         <span>Estoque</span>
       </button>
       <button class="nav-item" data-page="list">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon">📜</span>
         <span>Extrato</span>
       </button>
       <button class="nav-item" data-page="settings">
@@ -42,8 +48,8 @@
     <section id="dashboardPage" class="page">
       <header class="topbar">
         <div>
-          <span class="badge-mini">Painel de Controle</span>
-          <h1>Resumo</h1>
+          <span class="eyebrow">RESUMO GERAL</span>
+          <h1>Visão Financeira</h1>
         </div>
         <div class="period-filter">
           <select id="filtroPeriodo">
@@ -54,143 +60,123 @@
         </div>
       </header>
 
-      <!-- Botões de Acesso Rápido -->
+      <!-- Botões de Ação Rápida -->
       <div class="quick-grid">
-        <button class="card-btn green" data-tipo="venda">
-          <span class="btn-icon">💰</span>
-          <div>
+        <button class="action-card green" data-tipo="venda">
+          <div class="action-icon">💰</div>
+          <div class="action-info">
             <strong>Venda</strong>
-            <small>Baixa estoque</small>
+            <small>Abate estoque</small>
           </div>
         </button>
-        <button class="card-btn orange" data-tipo="frete">
-          <span class="btn-icon">🚚</span>
-          <div>
+
+        <button class="action-card orange" data-tipo="frete">
+          <div class="action-icon">🚚</div>
+          <div class="action-info">
             <strong>Frete / Flex</strong>
-            <small>Motoboy / Envio</small>
+            <small>Envios e corridas</small>
           </div>
         </button>
-        <button class="card-btn blue" data-tipo="compra_produto">
-          <span class="btn-icon">📥</span>
-          <div>
+
+        <button class="action-card blue" data-tipo="compra_produto">
+          <div class="action-icon">📥</div>
+          <div class="action-info">
             <strong>Estoque</strong>
-            <small>Comprar produto</small>
+            <small>Entrada produto</small>
           </div>
         </button>
-        <button class="card-btn purple" data-tipo="compra_insumo">
-          <span class="btn-icon">🏷️</span>
-          <div>
+
+        <button class="action-card purple" data-tipo="compra_insumo">
+          <div class="action-icon">🏷️</div>
+          <div class="action-info">
             <strong>Insumos</strong>
-            <small>Comprar caixas</small>
+            <small>Caixas e sacolas</small>
           </div>
         </button>
       </div>
 
-      <!-- Métricas em Cards Compactos -->
+      <!-- Métricas em Cards Modernos -->
       <div class="metrics-grid">
-        <div class="metric-card">
-          <span>Vendas</span>
-          <strong id="metricaVendas">R$ 0,00</strong>
+        <div class="kpi-card">
+          <div class="kpi-label">Faturamento</div>
+          <div class="kpi-value" id="metricaVendas">R$ 0,00</div>
+          <div class="kpi-sub">Total de vendas brutas</div>
         </div>
-        <div class="metric-card green-card">
-          <span>Lucro Limpo</span>
-          <strong id="metricaLucro">R$ 0,00</strong>
+
+        <div class="kpi-card highlight-green">
+          <div class="kpi-label">Lucro no Bolso</div>
+          <div class="kpi-value text-green" id="metricaLucro">R$ 0,00</div>
+          <div class="kpi-sub">Lucro real apurado</div>
         </div>
-        <div class="metric-card red-card">
-          <span>Fretes Pagos</span>
-          <strong id="metricaFretes">R$ 0,00</strong>
+
+        <div class="kpi-card highlight-red">
+          <div class="kpi-label">Gastos com Frete</div>
+          <div class="kpi-value text-red" id="metricaFretes">R$ 0,00</div>
+          <div class="kpi-sub">Flex, motoboy e correios</div>
         </div>
-        <div class="metric-card purple-card">
-          <span>Compras Total</span>
-          <strong id="metricaCompras">R$ 0,00</strong>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Total em Compras</div>
+          <div class="kpi-value" id="metricaCompras">R$ 0,00</div>
+          <div class="kpi-sub">Produtos + Embalagens</div>
         </div>
       </div>
 
-      <!-- Últimos Lançamentos -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Últimas Atividades</h2>
-          <button class="link-btn" id="btnVerTodos">Ver tudo &rarr;</button>
+      <!-- Feed de Atividades Recentes em Cards -->
+      <div class="section-container">
+        <div class="section-header">
+          <h2>Últimos Lançamentos</h2>
+          <button class="link-btn" id="btnVerTodos">Ver extrato &rarr;</button>
         </div>
-        <div class="table-responsive">
-          <table class="simple-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Item</th>
-                <th>Qtd</th>
-                <th>Total</th>
-                <th>Lucro</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaRecentes"></tbody>
-          </table>
+
+        <div id="listaRecentes" class="cards-feed">
+          <!-- Gerado dinamicamente -->
         </div>
       </div>
     </section>
 
-    <!-- TELA 2: ESTOQUE -->
+    <!-- TELA 2: ESTOQUE EM TEMPO REAL -->
     <section id="estoquePage" class="page hidden">
       <header class="topbar">
         <div>
-          <h1>Estoque Atual</h1>
-          <p>Saldo calculado em tempo real</p>
+          <span class="eyebrow">CONTROLE FÍSICO</span>
+          <h1>Estoque em Saldo</h1>
         </div>
       </header>
 
-      <div class="grid-dupla">
-        <div class="panel">
-          <h2>📦 Produtos</h2>
-          <div class="table-responsive">
-            <table class="simple-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th style="text-align: right;">Saldo</th>
-                </tr>
-              </thead>
-              <tbody id="tabelaEstoqueProdutos"></tbody>
-            </table>
-          </div>
+      <div class="stock-container">
+        <div class="section-container">
+          <h2 class="sub-title">📦 Produtos à Venda</h2>
+          <div id="listaEstoqueProdutos" class="stock-grid"></div>
         </div>
 
-        <div class="panel">
-          <h2>🏷️ Embalagens & Insumos</h2>
-          <div class="table-responsive">
-            <table class="simple-table">
-              <thead>
-                <tr>
-                  <th>Insumo</th>
-                  <th style="text-align: right;">Saldo</th>
-                </tr>
-              </thead>
-              <tbody id="tabelaEstoqueInsumos"></tbody>
-            </table>
-          </div>
+        <div class="section-container">
+          <h2 class="sub-title">🏷️ Insumos e Embalagens</h2>
+          <div id="listaEstoqueInsumos" class="stock-grid"></div>
         </div>
       </div>
     </section>
 
     <!-- TELA 3: FORMULÁRIO -->
     <section id="formPage" class="page hidden">
-      <div class="panel form-panel">
-        <div class="panel-header">
+      <div class="form-container">
+        <div class="section-header">
           <h2 id="formTitulo">Novo Lançamento</h2>
-          <button class="btn btn-outline" id="btnVoltar">✕ Fechar</button>
+          <button class="close-btn" id="btnVoltar">✕</button>
         </div>
 
         <form id="meuForm">
-          <div class="form-grid">
-            <div class="form-group full">
-              <label>Tipo de Lançamento</label>
-              <select id="tipo" required>
-                <option value="venda">Venda (Baixa no estoque)</option>
-                <option value="frete">Frete / Flex / Motoboy</option>
-                <option value="compra_produto">Compra de Produtos (+ Estoque)</option>
-                <option value="compra_insumo">Compra de Insumos (+ Embalagens)</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Tipo de Registro</label>
+            <select id="tipo" required>
+              <option value="venda">Venda (Baixa no estoque)</option>
+              <option value="frete">Frete / Flex / Motoboy</option>
+              <option value="compra_produto">Compra de Produtos (+ Estoque)</option>
+              <option value="compra_insumo">Compra de Insumos (+ Embalagens)</option>
+            </select>
+          </div>
 
+          <div class="form-row">
             <div class="form-group">
               <label>Data</label>
               <input type="date" id="data" required>
@@ -200,13 +186,15 @@
               <label id="lblQtd">Quantidade</label>
               <input type="number" step="1" min="1" id="quantidade" value="1" required inputmode="numeric">
             </div>
+          </div>
 
-            <div class="form-group full">
-              <label id="lblDescricao">Nome do Item</label>
-              <input list="listaSugestoesProdutos" id="descricao" placeholder="Digite ou selecione..." required>
-              <datalist id="listaSugestoesProdutos"></datalist>
-            </div>
+          <div class="form-group">
+            <label id="lblDescricao">Nome do Produto ou Descrição</label>
+            <input list="listaSugestoesProdutos" id="descricao" placeholder="Ex: Fone Bluetooth Pro..." required>
+            <datalist id="listaSugestoesProdutos"></datalist>
+          </div>
 
+          <div class="form-row">
             <div class="form-group">
               <label id="lblValor">Valor Total (R$)</label>
               <input type="number" step="0.01" min="0" id="valor" placeholder="0,00" required inputmode="decimal">
@@ -216,73 +204,61 @@
               <label>Custo Unitário (R$)</label>
               <input type="number" step="0.01" min="0" id="custoProduto" placeholder="0,00" inputmode="decimal">
             </div>
-
-            <div class="form-group campo-venda full">
-              <label>Lucro Real Limpo (R$)</label>
-              <input type="number" step="0.01" id="lucro" placeholder="Calculado ou digite..." inputmode="decimal">
-            </div>
-
-            <div class="form-group campo-venda full">
-              <label>Insumo Usado (Baixa 1 un.)</label>
-              <input list="listaSugestoesInsumos" id="insumoUsado" placeholder="Escolha a embalagem...">
-              <datalist id="listaSugestoesInsumos"></datalist>
-            </div>
-
-            <div class="form-group full">
-              <label>Observação</label>
-              <input type="text" id="obs" placeholder="Ex: Cliente pagou por fora / Uber">
-            </div>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary full-btn" id="btnSalvar">Salvar Registro</button>
+          <div class="form-group campo-venda">
+            <label>Lucro Real Limpo (R$)</label>
+            <input type="number" step="0.01" id="lucro" placeholder="Calculado automaticamente" inputmode="decimal">
           </div>
+
+          <div class="form-group campo-venda">
+            <label>Embalagem Usada (Baixará 1 un.)</label>
+            <input list="listaSugestoesInsumos" id="insumoUsado" placeholder="Selecione ou digite...">
+            <datalist id="listaSugestoesInsumos"></datalist>
+          </div>
+
+          <div class="form-group">
+            <label>Observação (Opcional)</label>
+            <input type="text" id="obs" placeholder="Ex: Rastreio QD123, Uber Flash, etc.">
+          </div>
+
+          <button type="submit" class="submit-btn" id="btnSalvar">Confirmar e Salvar</button>
           <p id="msgForm" class="msg-status"></p>
         </form>
       </div>
     </section>
 
-    <!-- TELA 4: HISTÓRICO COMPLETO -->
+    <!-- TELA 4: EXTRATO COMPLETO -->
     <section id="listPage" class="page hidden">
-      <div class="panel">
-        <div class="panel-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
-          <h2>Histórico Completo</h2>
-          <input type="search" id="buscaLista" placeholder="Buscar por descrição..." class="input-search">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">HISTÓRICO</span>
+          <h1>Extrato de Lançamentos</h1>
         </div>
-        <div class="table-responsive">
-          <table class="simple-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Tipo</th>
-                <th>Item</th>
-                <th>Qtd</th>
-                <th>Total</th>
-                <th>Lucro</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaTodos"></tbody>
-          </table>
-        </div>
+      </header>
+
+      <div class="search-box">
+        <input type="search" id="buscaLista" placeholder="🔍 Buscar por nome ou descrição...">
+      </div>
+
+      <div id="listaExtrato" class="cards-feed">
+        <!-- Gerado dinamicamente -->
       </div>
     </section>
 
-    <!-- TELA 5: CONFIGURAÇÕES -->
+    <!-- TELA 5: NUVEM / CONFIGURAÇÕES -->
     <section id="settingsPage" class="page hidden">
-      <div class="panel form-panel">
+      <div class="form-container">
         <h2>Conexão Google Sheets</h2>
-        <p style="font-size:13px; color:#64748b; margin-top:5px;">Conecte sua planilha para sincronizar seus dados no celular.</p>
-        
-        <div class="form-group full" style="margin-top:15px;">
-          <label>URL do Web App (/exec):</label>
+        <p class="muted">Os dados ficam salvos no seu aparelho e são espelhados em tempo real na planilha.</p>
+
+        <div class="form-group" style="margin-top:20px;">
+          <label>URL do Web App do Apps Script:</label>
           <input type="url" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
 
-        <div class="form-actions" style="margin-top:15px; flex-direction: column; gap: 10px;">
-          <button class="btn btn-primary full-btn" id="btnSalvarConfig">Salvar Conexão</button>
-          <button class="btn btn-outline full-btn" id="btnSincronizar">Baixar Dados da Planilha</button>
-        </div>
+        <button class="submit-btn" id="btnSalvarConfig">Salvar URL da Nuvem</button>
+        <button class="outline-btn" id="btnSincronizar" style="margin-top:10px;">Puxar Tudo da Planilha</button>
         <p id="msgConfig" class="msg-status"></p>
       </div>
     </section>

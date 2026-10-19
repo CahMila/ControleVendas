@@ -190,7 +190,7 @@ async function salvarForm(e) {
   e.preventDefault();
   const btn = $("btnSalvar");
   btn.disabled = true;
-  btn.textContent = "Salvando...";
+  btn.textContent = "Gravando...";
 
   const tipo = $("tipo").value;
   const item = {
@@ -219,15 +219,55 @@ async function salvarForm(e) {
   try {
     await salvarNoSheets(item);
     $("msgForm").textContent = "✓ Salvo com sucesso!";
-    $("msgForm").style.color = "green";
+    $("msgForm").style.color = "var(--green)";
   } catch {
-    $("msgForm").textContent = "Salvo localmente.";
-    $("msgForm").style.color = "orange";
+    $("msgForm").textContent = "Salvo no celular (Offline).";
+    $("msgForm").style.color = "var(--orange)";
   }
 
   btn.disabled = false;
-  btn.textContent = "Salvar Registro";
+  btn.textContent = "Confirmar e Salvar";
   setTimeout(() => navegarPara("dashboard"), 400);
+}
+
+// Criação do card visual da transação
+function gerarCardHTML(item, comAcoes = false) {
+  const configs = {
+    venda: { icon: "💰", badgeClass: "badge-venda", prefix: "+" },
+    frete: { icon: "🚚", badgeClass: "badge-frete", prefix: "-" },
+    compra_produto: { icon: "📥", badgeClass: "badge-compra", prefix: "-" },
+    compra_insumo: { icon: "🏷️", badgeClass: "badge-insumo", prefix: "-" }
+  }[item.tipo] || { icon: "📄", badgeClass: "badge-compra", prefix: "" };
+
+  const dataFormatada = item.data ? item.data.slice(5).replace("-", "/") : "";
+
+  return `
+    <div class="entry-card">
+      <div class="entry-left">
+        <div class="entry-badge-icon ${configs.badgeClass}">
+          ${configs.icon}
+        </div>
+        <div class="entry-details">
+          <div class="entry-title">${item.descricao}</div>
+          <div class="entry-meta">
+            <span>${dataFormatada}</span>
+            <span class="entry-pill">${item.quantidade || 1} un</span>
+            ${item.insumoUsado ? `<span class="entry-pill">📦 ${item.insumoUsado}</span>` : ""}
+          </div>
+        </div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-amount">${configs.prefix} ${formatarMoeda(item.valor)}</div>
+        ${item.tipo === 'venda' && item.lucro > 0 ? `<div class="entry-profit">+${formatarMoeda(item.lucro)} lucro</div>` : ""}
+        ${comAcoes ? `
+          <div class="entry-actions">
+            <button class="btn-icon-sm" onclick="editarItem('${item.id}')">✏️</button>
+            <button class="btn-icon-sm" onclick="excluirItem('${item.id}')">🗑️</button>
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
 }
 
 function renderizarDashboard() {
@@ -247,68 +287,37 @@ function renderizarDashboard() {
   $("metricaFretes").textContent = formatarMoeda(fretes.reduce((acc, i) => acc + i.valor, 0));
   $("metricaCompras").textContent = formatarMoeda(compras.reduce((acc, i) => acc + i.valor, 0));
 
-  $("tabelaRecentes").innerHTML = filtrados.slice(0, 6).map(i => `
-    <tr>
-      <td>${i.data.slice(5).replace("-", "/")}</td>
-      <td><strong>${i.descricao}</strong></td>
-      <td>${i.quantidade || 1}</td>
-      <td>${formatarMoeda(i.valor)}</td>
-      <td style="color:${i.lucro > 0 ? '#10b981' : 'inherit'}; font-weight:bold;">
-        ${i.tipo === 'venda' ? formatarMoeda(i.lucro) : '—'}
-      </td>
-    </tr>
-  `).join("") || "<tr><td colspan='5' style='text-align:center;'>Nenhum registro no período.</td></tr>";
+  const recentes = filtrados.slice(0, 5);
+  $("listaRecentes").innerHTML = recentes.length 
+    ? recentes.map(i => gerarCardHTML(i, false)).join("")
+    : `<div class="empty-state">Nenhum lançamento no período.</div>`;
 }
 
 function renderizarTelaEstoque() {
   const { estoqueProdutos, estoqueInsumos } = calcularEstoques();
 
-  $("tabelaEstoqueProdutos").innerHTML = Object.entries(estoqueProdutos).map(([nome, saldo]) => `
-    <tr>
-      <td><strong>${nome}</strong></td>
-      <td style="text-align: right;">
-        <span class="badge ${saldo <= 2 ? 'critico' : 'ok'}">${saldo} un</span>
-      </td>
-    </tr>
-  `).join("") || "<tr><td colspan='2' style='text-align:center;'>Nenhum produto cadastrado.</td></tr>";
+  $("listaEstoqueProdutos").innerHTML = Object.keys(estoqueProdutos).length ? Object.entries(estoqueProdutos).map(([nome, saldo]) => `
+    <div class="stock-card">
+      <div class="stock-name">📦 ${nome}</div>
+      <div class="stock-count ${saldo <= 2 ? 'low' : 'ok'}">${saldo} un</div>
+    </div>
+  `).join("") : `<div class="empty-state">Nenhum produto cadastrado.</div>`;
 
-  $("tabelaEstoqueInsumos").innerHTML = Object.entries(estoqueInsumos).map(([nome, saldo]) => `
-    <tr>
-      <td><strong>${nome}</strong></td>
-      <td style="text-align: right;">
-        <span class="badge ${saldo <= 5 ? 'critico' : 'ok'}">${saldo} un</span>
-      </td>
-    </tr>
-  `).join("") || "<tr><td colspan='2' style='text-align:center;'>Nenhum insumo cadastrado.</td></tr>";
-}
-
-function rotuloTipo(tipo) {
-  return {
-    venda: "Venda",
-    frete: "Frete",
-    compra_produto: "+ Estoque",
-    compra_insumo: "+ Insumo"
-  }[tipo] || tipo;
+  $("listaEstoqueInsumos").innerHTML = Object.keys(estoqueInsumos).length ? Object.entries(estoqueInsumos).map(([nome, saldo]) => `
+    <div class="stock-card">
+      <div class="stock-name">🏷️ ${nome}</div>
+      <div class="stock-count ${saldo <= 5 ? 'low' : 'ok'}">${saldo} un</div>
+    </div>
+  `).join("") : `<div class="empty-state">Nenhum insumo cadastrado.</div>`;
 }
 
 function renderizarListaCompleta() {
   const busca = ($("buscaLista")?.value || "").toLowerCase();
   const lista = itens.filter(i => (i.descricao || "").toLowerCase().includes(busca));
 
-  $("tabelaTodos").innerHTML = lista.map(i => `
-    <tr>
-      <td>${i.data.slice(5).replace("-", "/")}</td>
-      <td><span class="badge ${i.tipo}">${rotuloTipo(i.tipo)}</span></td>
-      <td><strong>${i.descricao}</strong></td>
-      <td>${i.quantidade || 1}</td>
-      <td>${formatarMoeda(i.valor)}</td>
-      <td>${i.tipo === 'venda' ? formatarMoeda(i.lucro) : '—'}</td>
-      <td>
-        <button style="border:none; background:none; cursor:pointer;" onclick="editarItem('${i.id}')">✏️</button>
-        <button style="border:none; background:none; cursor:pointer;" onclick="excluirItem('${i.id}')">🗑️</button>
-      </td>
-    </tr>
-  `).join("") || "<tr><td colspan='7' style='text-align:center;'>Nenhum registro.</td></tr>";
+  $("listaExtrato").innerHTML = lista.length
+    ? lista.map(i => gerarCardHTML(i, true)).join("")
+    : `<div class="empty-state">Nenhum resultado encontrado.</div>`;
 }
 
 window.editarItem = (id) => {
@@ -333,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => navegarPara(btn.dataset.page));
   });
 
-  document.querySelectorAll(".card-btn").forEach(btn => {
+  document.querySelectorAll(".action-card").forEach(btn => {
     btn.addEventListener("click", () => abrirFormulario(btn.dataset.tipo));
   });
 
@@ -357,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("apiUrl").value = getApiUrl();
   $("btnSalvarConfig").addEventListener("click", () => {
     localStorage.setItem(CHAVE_API, $("apiUrl").value.trim());
-    $("msgConfig").textContent = "✓ Conexão salva!";
+    $("msgConfig").textContent = "✓ Conexão salva com sucesso!";
     setTimeout(() => $("msgConfig").textContent = "", 2000);
   });
 
@@ -370,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.success && res.lancamentos) {
         itens = res.lancamentos;
         salvarLocal();
-        $("msgConfig").textContent = `✓ ${itens.length} registros sincronizados!`;
+        $("msgConfig").textContent = `✓ ${itens.length} registros baixados!`;
         renderizarDashboard();
         renderizarTelaEstoque();
       }
