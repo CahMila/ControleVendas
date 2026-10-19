@@ -24,7 +24,6 @@ function getApiUrl() {
   return localStorage.getItem(CHAVE_API) || "";
 }
 
-// Envia dados para o Sheets
 async function salvarNoSheets(item) {
   const url = getApiUrl();
   if (!url) return;
@@ -51,7 +50,6 @@ async function deletarNoSheets(id) {
   });
 }
 
-// CÁLCULO DINÂMICO DE ESTOQUE
 function calcularEstoques() {
   const estoqueProdutos = {};
   const estoqueInsumos = {};
@@ -61,14 +59,12 @@ function calcularEstoques() {
     const nomeInsumo = (item.insumoUsado || "").trim();
     const qtd = Number(item.quantidade) || 1;
 
-    // 1. Produtos
     if (item.tipo === "compra_produto" && nomeItem) {
       estoqueProdutos[nomeItem] = (estoqueProdutos[nomeItem] || 0) + qtd;
     } else if (item.tipo === "venda" && nomeItem) {
       estoqueProdutos[nomeItem] = (estoqueProdutos[nomeItem] || 0) - qtd;
     }
 
-    // 2. Insumos / Embalagens
     if (item.tipo === "compra_insumo" && nomeItem) {
       estoqueInsumos[nomeItem] = (estoqueInsumos[nomeItem] || 0) + qtd;
     }
@@ -80,10 +76,8 @@ function calcularEstoques() {
   return { estoqueProdutos, estoqueInsumos };
 }
 
-// Atualiza o <datalist> para autocomplete no formulário
 function atualizarSugestoesDatalist() {
   const { estoqueProdutos, estoqueInsumos } = calcularEstoques();
-
   const dlProd = $("listaSugestoesProdutos");
   const dlIns = $("listaSugestoesInsumos");
 
@@ -95,7 +89,6 @@ function atualizarSugestoesDatalist() {
   }
 }
 
-// Navegação
 function navegarPara(pagina) {
   document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
   document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
@@ -118,9 +111,9 @@ function navegarPara(pagina) {
 
   const btnNav = document.querySelector(`[data-page="${pagina}"]`);
   if (btnNav) btnNav.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Ajuste dinâmico de campos no formulário
 function ajustarCamposForm() {
   const tipo = $("tipo").value;
   const camposVenda = document.querySelectorAll(".campo-venda");
@@ -129,26 +122,26 @@ function ajustarCamposForm() {
   if (tipo === "venda") {
     camposVenda.forEach(el => el.style.display = "flex");
     grupoQtd.style.display = "flex";
-    $("lblQtd").textContent = "Qtd Vendida (Abaterá do estoque)";
-    $("lblValor").textContent = "Preço Total da Venda (R$)";
+    $("lblQtd").textContent = "Qtd Vendida (- estoque)";
+    $("lblValor").textContent = "Valor Total da Venda (R$)";
     $("lblDescricao").textContent = "Nome do Produto Vendido";
   } else if (tipo === "compra_produto") {
     camposVenda.forEach(el => el.style.display = "none");
     grupoQtd.style.display = "flex";
-    $("lblQtd").textContent = "Qtd Comprada (+ Estoque)";
+    $("lblQtd").textContent = "Qtd Comprada (+ estoque)";
     $("lblValor").textContent = "Custo Total Pago (R$)";
-    $("lblDescricao").textContent = "Nome do Produto (Ex: Fone Lenovo)";
+    $("lblDescricao").textContent = "Nome do Produto";
   } else if (tipo === "compra_insumo") {
     camposVenda.forEach(el => el.style.display = "none");
     grupoQtd.style.display = "flex";
-    $("lblQtd").textContent = "Qtd de Embalagens (+ Estoque)";
+    $("lblQtd").textContent = "Qtd de Embalagens (+ estoque)";
     $("lblValor").textContent = "Custo Total Pago (R$)";
-    $("lblDescricao").textContent = "Nome do Insumo (Ex: Caixa P, Sacola G)";
-  } else { // Frete
+    $("lblDescricao").textContent = "Nome do Insumo (Ex: Caixa P)";
+  } else {
     camposVenda.forEach(el => el.style.display = "none");
     grupoQtd.style.display = "none";
     $("lblValor").textContent = "Valor do Frete Pago (R$)";
-    $("lblDescricao").textContent = "Destino / Motoboy / Rastreio";
+    $("lblDescricao").textContent = "Destino / Motoboy";
   }
 }
 
@@ -237,7 +230,6 @@ async function salvarForm(e) {
   setTimeout(() => navegarPara("dashboard"), 400);
 }
 
-// Renderizar Dashboard
 function renderizarDashboard() {
   const periodo = $("filtroPeriodo").value;
   const hoje = hojeISO();
@@ -258,50 +250,43 @@ function renderizarDashboard() {
   $("tabelaRecentes").innerHTML = filtrados.slice(0, 6).map(i => `
     <tr>
       <td>${i.data.slice(5).replace("-", "/")}</td>
-      <td><span class="badge ${i.tipo}">${rotuloTipo(i.tipo)}</span></td>
       <td><strong>${i.descricao}</strong></td>
       <td>${i.quantidade || 1}</td>
       <td>${formatarMoeda(i.valor)}</td>
       <td style="color:${i.lucro > 0 ? '#10b981' : 'inherit'}; font-weight:bold;">
         ${i.tipo === 'venda' ? formatarMoeda(i.lucro) : '—'}
       </td>
-      <td>${i.insumoUsado || '—'}</td>
     </tr>
-  `).join("") || "<tr><td colspan='7' style='text-align:center;'>Nenhum registro encontrado.</td></tr>";
+  `).join("") || "<tr><td colspan='5' style='text-align:center;'>Nenhum registro no período.</td></tr>";
 }
 
-// Renderizar Tela de Estoque
 function renderizarTelaEstoque() {
   const { estoqueProdutos, estoqueInsumos } = calcularEstoques();
 
-  // Tabela Produtos
-  const linhasProd = Object.entries(estoqueProdutos).map(([nome, saldo]) => `
+  $("tabelaEstoqueProdutos").innerHTML = Object.entries(estoqueProdutos).map(([nome, saldo]) => `
     <tr>
       <td><strong>${nome}</strong></td>
       <td style="text-align: right;">
         <span class="badge ${saldo <= 2 ? 'critico' : 'ok'}">${saldo} un</span>
       </td>
     </tr>
-  `).join("");
-  $("tabelaEstoqueProdutos").innerHTML = linhasProd || "<tr><td colspan='2' style='text-align:center;'>Nenhum produto cadastrado.</td></tr>";
+  `).join("") || "<tr><td colspan='2' style='text-align:center;'>Nenhum produto cadastrado.</td></tr>";
 
-  // Tabela Insumos
-  const linhasIns = Object.entries(estoqueInsumos).map(([nome, saldo]) => `
+  $("tabelaEstoqueInsumos").innerHTML = Object.entries(estoqueInsumos).map(([nome, saldo]) => `
     <tr>
       <td><strong>${nome}</strong></td>
       <td style="text-align: right;">
         <span class="badge ${saldo <= 5 ? 'critico' : 'ok'}">${saldo} un</span>
       </td>
     </tr>
-  `).join("");
-  $("tabelaEstoqueInsumos").innerHTML = linhasIns || "<tr><td colspan='2' style='text-align:center;'>Nenhum insumo cadastrado.</td></tr>";
+  `).join("") || "<tr><td colspan='2' style='text-align:center;'>Nenhum insumo cadastrado.</td></tr>";
 }
 
 function rotuloTipo(tipo) {
   return {
-    venda: "Venda (- Estoque)",
-    frete: "Frete / Flex",
-    compra_produto: "+ Estoque Prod.",
+    venda: "Venda",
+    frete: "Frete",
+    compra_produto: "+ Estoque",
     compra_insumo: "+ Insumo"
   }[tipo] || tipo;
 }
@@ -312,19 +297,18 @@ function renderizarListaCompleta() {
 
   $("tabelaTodos").innerHTML = lista.map(i => `
     <tr>
-      <td>${i.data}</td>
+      <td>${i.data.slice(5).replace("-", "/")}</td>
       <td><span class="badge ${i.tipo}">${rotuloTipo(i.tipo)}</span></td>
       <td><strong>${i.descricao}</strong></td>
       <td>${i.quantidade || 1}</td>
       <td>${formatarMoeda(i.valor)}</td>
       <td>${i.tipo === 'venda' ? formatarMoeda(i.lucro) : '—'}</td>
-      <td>${i.insumoUsado || '—'}</td>
       <td>
         <button style="border:none; background:none; cursor:pointer;" onclick="editarItem('${i.id}')">✏️</button>
         <button style="border:none; background:none; cursor:pointer;" onclick="excluirItem('${i.id}')">🗑️</button>
       </td>
     </tr>
-  `).join("") || "<tr><td colspan='8' style='text-align:center;'>Nenhum registro.</td></tr>";
+  `).join("") || "<tr><td colspan='7' style='text-align:center;'>Nenhum registro.</td></tr>";
 }
 
 window.editarItem = (id) => {
@@ -353,10 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => abrirFormulario(btn.dataset.tipo));
   });
 
-  $("btnNovaVenda").addEventListener("click", () => abrirFormulario("venda"));
-  $("btnVoltar").addEventListener("click", () => navegarPara("dashboard"));
-  $("btnCancelar").addEventListener("click", () => navegarPara("dashboard"));
-  $("btnVerTodos").addEventListener("click", () => navegarPara("list"));
+  $("btnVoltar")?.addEventListener("click", () => navegarPara("dashboard"));
+  $("btnVerTodos")?.addEventListener("click", () => navegarPara("list"));
 
   $("tipo").addEventListener("change", ajustarCamposForm);
   $("valor").addEventListener("input", autoCalcularLucro);
@@ -372,18 +354,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("meuForm").addEventListener("submit", salvarForm);
 
-  // API Config
   $("apiUrl").value = getApiUrl();
   $("btnSalvarConfig").addEventListener("click", () => {
     localStorage.setItem(CHAVE_API, $("apiUrl").value.trim());
-    $("msgConfig").textContent = "✓ Configuração salva!";
+    $("msgConfig").textContent = "✓ Conexão salva!";
     setTimeout(() => $("msgConfig").textContent = "", 2000);
   });
 
   $("btnSincronizar").addEventListener("click", async () => {
     const url = getApiUrl();
     if (!url) return alert("Cole a URL da planilha primeiro!");
-    $("msgConfig").textContent = "Baixando registros da planilha...";
+    $("msgConfig").textContent = "Baixando da planilha...";
     try {
       const res = await fetch(url, { redirect: "follow" }).then(r => r.json());
       if (res.success && res.lancamentos) {
@@ -394,7 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderizarTelaEstoque();
       }
     } catch {
-      $("msgConfig").textContent = "Falha ao puxar da planilha.";
+      $("msgConfig").textContent = "Erro ao puxar da planilha.";
     }
   });
 
