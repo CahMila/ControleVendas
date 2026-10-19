@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendas & Controle de Estoque</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">📦</div>
+      <div class="brand-text">
+        <strong>Vision XTech</strong>
+        <small>Estoque & Finanças</small>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <button class="nav-item active" data-page="dashboard">📊 Visão Geral</button>
+      <button class="nav-item" data-page="estoque">📦 Controle de Estoque</button>
+      <button class="nav-item" data-page="list">📋 Histórico Completo</button>
+      <button class="nav-item" data-page="settings">⚙️ Planilha Google</button>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    
+    <!-- TELA 1: DASHBOARD -->
+    <section id="dashboardPage" class="page">
+      <header class="topbar">
+        <div>
+          <h1>Painel Principal</h1>
+          <p>Visão rápida do caixa e alertas de estoque</p>
+        </div>
+        
+        <div class="period-filter">
+          <select id="filtroPeriodo">
+            <option value="mes" selected>Este Mês</option>
+            <option value="hoje">Hoje</option>
+            <option value="tudo">Todo o Histórico</option>
+          </select>
+          <button class="btn btn-primary" id="btnNovaVenda">+ Registrar Venda</button>
+        </div>
+      </header>
+
+      <!-- Botões Rápidos -->
+      <div class="quick-grid">
+        <button class="card-btn green" data-tipo="venda">
+          <strong>+ Venda</strong>
+          <small>Baixa produto e embalagem</small>
+        </button>
+        <button class="card-btn orange" data-tipo="frete">
+          <strong>🚚 Frete / Flex</strong>
+          <small>Gastos com corridas/envios</small>
+        </button>
+        <button class="card-btn blue" data-tipo="compra_produto">
+          <strong>📥 Comprar Produtos</strong>
+          <small>Soma itens no estoque</small>
+        </button>
+        <button class="card-btn purple" data-tipo="compra_insumo">
+          <strong>🏷️ Comprar Insumos</strong>
+          <small>Soma caixas/embalagens</small>
+        </button>
+      </div>
+
+      <!-- Métricas Financeiras -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span>Vendas Brutas</span>
+          <strong id="metricaVendas">R$ 0,00</strong>
+        </div>
+        <div class="metric-card green-card">
+          <span>Lucro Líquido Real</span>
+          <strong id="metricaLucro">R$ 0,00</strong>
+        </div>
+        <div class="metric-card red-card">
+          <span>Total Fretes / Flex</span>
+          <strong id="metricaFretes">R$ 0,00</strong>
+        </div>
+        <div class="metric-card">
+          <span>Compras (Estoque + Caixas)</span>
+          <strong id="metricaCompras">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <!-- Últimas Vendas & Movimentos -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Últimas Movimentações</h2>
+          <button class="btn btn-outline" id="btnVerTodos">Ver Tudo</button>
+        </div>
+        <table class="simple-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Item / Descrição</th>
+              <th>Qtd</th>
+              <th>Valor Total</th>
+              <th>Lucro</th>
+              <th>Embalagem Usada</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaRecentes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TELA 2: ESTOQUE EM TEMPO REAL -->
+    <section id="estoquePage" class="page hidden">
+      <header class="topbar">
+        <div>
+          <h1>Estoque Atual</h1>
+          <p>Calculado automaticamente das compras menos as vendas realizadas</p>
+        </div>
+      </header>
+
+      <div class="grid-dupla">
+        <div class="panel">
+          <h2>📦 Produtos para Venda</h2>
+          <table class="simple-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th style="text-align: right;">Saldo Atual</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEstoqueProdutos"></tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h2>🏷️ Insumos & Embalagens</h2>
+          <table class="simple-table">
+            <thead>
+              <tr>
+                <th>Embalagem</th>
+                <th style="text-align: right;">Saldo Atual</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEstoqueInsumos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 3: FORMULÁRIO -->
+    <section id="formPage" class="page hidden">
+      <div class="panel form-panel">
+        <div class="panel-header">
+          <h2 id="formTitulo">Novo Lançamento</h2>
+          <button class="btn btn-outline" id="btnVoltar">Voltar</button>
+        </div>
+
+        <form id="meuForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de Operação</label>
+              <select id="tipo" required>
+                <option value="venda">Venda (Baixa Estoque)</option>
+                <option value="frete">Frete / Flex / Motoboy</option>
+                <option value="compra_produto">Compra de Produtos (+ Estoque)</option>
+                <option value="compra_insumo">Compra de Insumos (+ Embalagens)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="data" required>
+            </div>
+
+            <!-- Campo de Item com Auto-complete -->
+            <div class="form-group full">
+              <label id="lblDescricao">Nome do Produto</label>
+              <input list="listaSugestoesProdutos" id="descricao" placeholder="Digite ou selecione o produto..." required>
+              <datalist id="listaSugestoesProdutos"></datalist>
+            </div>
+
+            <div class="form-group" id="grupoQuantidade">
+              <label id="lblQtd">Quantidade</label>
+              <input type="number" step="1" min="1" id="quantidade" value="1" required>
+            </div>
+
+            <div class="form-group">
+              <label id="lblValor">Valor Total (R$)</label>
+              <input type="number" step="0.01" min="0" id="valor" placeholder="0,00" required>
+            </div>
+
+            <!-- Campos de Venda -->
+            <div class="form-group campo-venda">
+              <label>Custo Unitário da Peça (R$)</label>
+              <input type="number" step="0.01" min="0" id="custoProduto" placeholder="Quanto você pagou nele">
+            </div>
+
+            <div class="form-group campo-venda">
+              <label>Lucro Real Limpo (R$)</label>
+              <input type="number" step="0.01" id="lucro" placeholder="Lucro da venda">
+            </div>
+
+            <div class="form-group campo-venda full">
+              <label>Insumo / Embalagem Usada (Baixará 1 unidade)</label>
+              <input list="listaSugestoesInsumos" id="insumoUsado" placeholder="Escolha ou digite a embalagem usada...">
+              <datalist id="listaSugestoesInsumos"></datalist>
+            </div>
+
+            <div class="form-group full">
+              <label>Observação (Opcional)</label>
+              <input type="text" id="obs" placeholder="Ex: Entregue via Uber / Comprado com fornecedor Y">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="btnCancelar">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar Registro</button>
+          </div>
+          <p id="msgForm" class="msg-status"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- TELA 4: HISTÓRICO COMPLETO -->
+    <section id="listPage" class="page hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Histórico Geral de Entradas e Saídas</h2>
+          <input type="search" id="buscaLista" placeholder="Buscar lançamentos..." style="padding:6px 12px; border:1px solid #ccc; border-radius:6px;">
+        </div>
+        <table class="simple-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Item / Descrição</th>
+              <th>Qtd</th>
+              <th>Valor Total</th>
+              <th>Lucro</th>
+              <th>Insumo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaTodos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TELA 5: CONFIGURAÇÕES -->
+    <section id="settingsPage" class="page hidden">
+      <div class="panel form-panel">
+        <h2>Conexão Google Sheets</h2>
+        <div class="form-group full" style="margin-top:15px;">
+          <label>URL do Web App (/exec):</label>
+          <input type="url" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <div class="form-actions" style="margin-top:15px;">
+          <button class="btn btn-primary" id="btnSalvarConfig">Salvar Conexão</button>
+          <button class="btn btn-outline" id="btnSincronizar">Puxar Dados da Planilha</button>
+        </div>
+        <p id="msgConfig" class="msg-status"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
